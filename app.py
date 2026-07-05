@@ -13,6 +13,39 @@ st.set_page_config(
     layout="wide"
 )
 
+# ==========================================
+# Paleta de colores personalizada (Tonos morados / teal)
+# ==========================================
+st.markdown("""
+<style>
+    .stApp {
+        background-color: #0f1420;
+    }
+    div[data-testid="stMetric"] {
+        background-color: #1c2333;
+        border: 1px solid #3a4a6b;
+        border-radius: 10px;
+        padding: 15px;
+    }
+    div[data-testid="stMetricValue"] {
+        color: #7de3d1;
+    }
+    .stButton>button {
+        background-color: #6c63ff;
+        color: white;
+        border-radius: 8px;
+        border: none;
+    }
+    .stButton>button:hover {
+        background-color: #574fd6;
+        color: white;
+    }
+    h1, h2, h3 {
+        color: #e6e6fa;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Título de la aplicación
 st.title("Sistema de Segmentación y Riesgo Actuarial (K-means) - Inteligencia Artificial -Allan Manuel Orellana - 20211920128")
 st.markdown("""
@@ -49,36 +82,44 @@ if modelo is None:
     st.stop()
 
 # ==========================================
-# Barra Lateral - Entrada de Datos del Cliente (En Español)
+# Entrada de Datos del Cliente - Formulario en el área principal (en Español)
 # ==========================================
-st.sidebar.header("Datos del Cliente")
+st.subheader("Datos del Cliente")
 
-age = st.sidebar.slider("Edad", min_value=18, max_value=100, value=35)
+with st.form("formulario_cliente"):
+    col_a, col_b, col_c = st.columns(3)
 
-# 1. Sexo: Mostrar en español, mapear a inglés
-sexo_opciones = {"Femenino": "female", "Masculino": "male"}
-sex_es = st.sidebar.selectbox("Sexo", options=list(sexo_opciones.keys()))
-sex = sexo_opciones[sex_es] # Guarda el valor en inglés para el modelo
+    with col_a:
+        age = st.number_input("Edad", min_value=18, max_value=100, value=35, step=1)
+        children = st.number_input("Número de hijos", min_value=0, max_value=10, value=1, step=1)
 
-bmi = st.sidebar.slider("Índice de Masa Corporal (BMI)", min_value=15.0, max_value=60.0, value=28.5, step=0.1)
-children = st.sidebar.number_input("Número de hijos", min_value=0, max_value=10, value=1, step=1)
+    with col_b:
+        sexo_opciones = {"Femenino": "female", "Masculino": "male"}
+        sex_es = st.radio("Sexo", options=list(sexo_opciones.keys()), horizontal=True)
+        sex = sexo_opciones[sex_es]
 
-# 2. Fumador: Mostrar en español, mapear a inglés
-fumador_opciones = {"Sí": "yes", "No": "no"}
-smoker_es = st.sidebar.selectbox("¿Es Fumador?", options=list(fumador_opciones.keys()))
-smoker = fumador_opciones[smoker_es] # Guarda el valor en inglés para el modelo
+        fumador_opciones = {"Sí": "yes", "No": "no"}
+        smoker_es = st.radio("¿Es Fumador?", options=list(fumador_opciones.keys()), horizontal=True)
+        smoker = fumador_opciones[smoker_es]
 
-# 3. Región: Mostrar en español, mapear a inglés
-region_opciones = {
-    "Suroeste (Southwest)": "southwest", 
-    "Sureste (Southeast)": "southeast", 
-    "Noroeste (Northwest)": "northwest", 
-    "Noreste (Northeast)": "northeast"
-}
-region_es = st.sidebar.selectbox("Región", options=list(region_opciones.keys()))
-region = region_opciones[region_es] # Guarda el valor en inglés para el modelo
+    with col_c:
+        bmi = st.slider("Índice de Masa Corporal (BMI)", min_value=15.0, max_value=60.0, value=28.5, step=0.1)
+        region_opciones = {
+            "Suroeste (Southwest)": "southwest", 
+            "Sureste (Southeast)": "southeast", 
+            "Noroeste (Northwest)": "northwest", 
+            "Noreste (Northeast)": "northeast"
+        }
+        region_es = st.selectbox("Región", options=list(region_opciones.keys()))
+        region = region_opciones[region_es]
 
-charges = st.sidebar.number_input("Cargos Médicos Anuales ($)", min_value=100.0, max_value=100000.0, value=13000.0, step=500.0)
+    charges = st.slider("Cargos Médicos Anuales ($)", min_value=100.0, max_value=100000.0, value=13000.0, step=500.0)
+
+    enviado = st.form_submit_button("Calcular Segmento de Riesgo")
+
+if not enviado:
+    st.info("Completa el formulario y presiona 'Calcular Segmento de Riesgo' para ver los resultados.")
+    st.stop()
 
 # El diccionario interno que va al modelo SE MANTIENE en inglés para que no falle el pipeline
 cliente_dict = {
@@ -145,25 +186,29 @@ with col2:
     if df is not None:
         # Gráfico de dispersión interactivo/visual que muestra dónde se ubica el cliente actual
         fig, ax = plt.subplots(figsize=(7, 4.5))
-        
-        # Simulamos una segmentación visual rápida basada en cargos y bmi si no tienes las etiquetas guardadas
-        # Para hacerlo exacto, tu Colab debería haber guardado las etiquetas o entrenas el gráfico aquí
+        fig.patch.set_facecolor("#0f1420")
+        ax.set_facecolor("#1c2333")
+
+        # Paleta personalizada morado/teal en lugar de "Set2"
+        paleta_personalizada = {"yes": "#ff6b81", "no": "#7de3d1"}
+
         sns.scatterplot(
             data=df, 
             x="bmi", 
             y="charges", 
             hue="smoker", 
-            alpha=0.5, 
-            palette="Set2", 
+            alpha=0.6, 
+            palette=paleta_personalizada, 
             ax=ax
         )
         
         # Destacar la posición del cliente ingresado
-        ax.scatter(bmi, charges, color="red", s=200, marker="X", label="Cliente Actual")
-        ax.set_title("Distribución de Clientes: BMI vs Cargos Médicos")
-        ax.set_xlabel("Índice de Masa Corporal (BMI)")
-        ax.set_ylabel("Cargos Médicos ($)")
-        ax.legend()
+        ax.scatter(bmi, charges, color="#ffd166", s=220, marker="*", edgecolor="white", linewidth=1, label="Cliente Actual")
+        ax.set_title("Distribución de Clientes: BMI vs Cargos Médicos", color="#e6e6fa")
+        ax.set_xlabel("Índice de Masa Corporal (BMI)", color="#e6e6fa")
+        ax.set_ylabel("Cargos Médicos ($)", color="#e6e6fa")
+        ax.tick_params(colors="#e6e6fa")
+        ax.legend(facecolor="#1c2333", labelcolor="#e6e6fa")
         
         st.pyplot(fig)
     else:
