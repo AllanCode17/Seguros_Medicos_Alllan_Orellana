@@ -10,12 +10,11 @@ import seaborn as sns
 # Configuración de la página
 st.set_page_config(
     page_title="Predicción de Riesgo Actuarial",
-    page_icon="🏥",
     layout="wide"
 )
 
 # Título de la aplicación
-st.title(" Sistema de Segmentación y Riesgo Actuarial (K-means) - Inteligencia Artificial - Joksan Zavala - 20201900395")
+st.title("Sistema de Segmentación y Riesgo Actuarial (K-means) - Inteligencia Artificial -Allan Manuel Orellana - 20211920128")
 st.markdown("""
 Esta aplicación permite ingresar los datos de un asegurado para asignarlo a un segmento (Cluster) 
 y determinar su nivel de riesgo actuarial.
@@ -46,13 +45,13 @@ modelo, metadata, df = cargar_recursos()
 
 # Verificar que el modelo principal esté cargado
 if modelo is None:
-    st.error(" No se encontró el modelo K-means en `models/kmeans_riesgo_actuarial.pkl`. Por favor verifica la ruta.")
+    st.error("No se encontró el modelo K-means en `models/kmeans_riesgo_actuarial.pkl`. Por favor verifica la ruta.")
     st.stop()
 
 # ==========================================
 # Barra Lateral - Entrada de Datos del Cliente (En Español)
 # ==========================================
-st.sidebar.header("📋 Datos del Cliente")
+st.sidebar.header("Datos del Cliente")
 
 age = st.sidebar.slider("Edad", min_value=18, max_value=100, value=35)
 
@@ -126,23 +125,23 @@ explicacion_cluster = explicacion_mapeo.get(cluster_asignado, "Segmento de clien
 col1, col2 = st.columns([1, 2])
 
 with col1:
-    st.subheader("🎯 Resultado de Segmentación")
+    st.subheader("Resultado de Segmentación")
     
     # Contenedor visual para el Cluster y Riesgo
     st.metric(label="Cluster Asignado", value=f"Cluster {cluster_asignado}")
     
     # Color dinámico según el riesgo
     if nivel_riesgo == "Alto":
-        st.error(f" Riesgo Actuarial: {nivel_riesgo}")
+        st.error(f"Riesgo Actuarial: {nivel_riesgo}")
     elif nivel_riesgo == "Medio":
-        st.warning(f" Riesgo Actuarial: {nivel_riesgo}")
+        st.warning(f"Riesgo Actuarial: {nivel_riesgo}")
     else:
-        st.success(f" Riesgo Actuarial: {nivel_riesgo}")
+        st.success(f"Riesgo Actuarial: {nivel_riesgo}")
         
     st.write(f"Análisis del Perfil: {explicacion_cluster}")
 
 with col2:
-    st.subheader(" Contexto General del Modelo")
+    st.subheader("Contexto General del Modelo")
     if df is not None:
         # Gráfico de dispersión interactivo/visual que muestra dónde se ubica el cliente actual
         fig, ax = plt.subplots(figsize=(7, 4.5))
@@ -174,7 +173,7 @@ with col2:
 # Detalles del Cliente Ingresado (Traducido al Español)
 # ==========================================
 st.markdown("---")
-st.subheader("📋 Resumen de datos enviados")
+st.subheader("Resumen de datos enviados")
 
 # Creamos una copia en español para mostrarla en la interfaz
 df_bonito = pd.DataFrame([{
